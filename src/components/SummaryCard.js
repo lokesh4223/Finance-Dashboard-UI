@@ -1,27 +1,72 @@
 import React from 'react';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 const SummaryCard = ({ title, amount, change, icon, trend }) => {
-  const Icon = icon;
   const isPositive = trend === 'up';
-  
+  const Icon = icon;
+
   return (
-    <div className="card hover:shadow-md transition-shadow duration-200">
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-2xl font-bold mt-1">${amount.toLocaleString()}</p>
-          <div className={`flex items-center mt-2 text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? (
-              <FaArrowUp className="mr-1" />
-            ) : (
-              <FaArrowDown className="mr-1" />
-            )}
-            <span>{change}% from last month</span>
+    <div className="win-window" style={{ minWidth: 0 }}>
+      {/* Title bar */}
+      <div className="win-titlebar" style={{ fontSize: '10px', padding: '2px 4px 2px 6px' }}>
+        <span>{title}</span>
+        <span className="win-titlebar-btn" style={{ fontSize: '8px' }}>?</span>
+      </div>
+
+      {/* Content area */}
+      <div style={{ padding: '8px 10px 8px 10px', backgroundColor: 'var(--win-face)' }}>
+        {/* Icon + amount row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+          {/* Sunken icon box */}
+          <div
+            className="win-sunken"
+            style={{
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Icon size={18} color={isPositive ? 'var(--win-green)' : 'var(--win-red)'} />
+          </div>
+
+          <div>
+            <div
+              style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                fontFamily: 'Courier New, monospace',
+                color: isPositive ? 'var(--win-green)' : 'var(--win-red)',
+                letterSpacing: '-0.5px',
+              }}
+            >
+              ${parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </div>
           </div>
         </div>
-        <div className={`p-3 rounded-full ${isPositive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-          <Icon size={24} />
+
+        {/* Separator */}
+        <div
+          style={{
+            borderTop: '1px solid var(--win-border-shadow)',
+            borderBottom: '1px solid var(--win-border-light)',
+            margin: '4px 0',
+          }}
+        />
+
+        {/* Status bar style footer */}
+        <div className="win-statusbar" style={{ padding: '1px 0', gap: '4px' }}>
+          <span
+            style={{
+              color: isPositive ? 'var(--win-green)' : 'var(--win-red)',
+              fontWeight: 'bold',
+              fontSize: '10px',
+            }}
+          >
+            {isPositive ? '▲' : '▼'} {change}%
+          </span>
+          <span style={{ fontSize: '10px', color: 'var(--win-text-muted)' }}>vs. last month</span>
         </div>
       </div>
     </div>

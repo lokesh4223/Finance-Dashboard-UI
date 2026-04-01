@@ -2,37 +2,372 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== WINDOWS 2000 DESIGN SYSTEM ===== */
+
+/* Color tokens */
+:root {
+  --win-bg: #d4d0c8;
+  --win-face: #d4d0c8;
+  --win-titlebar-active: #0a246a;
+  --win-titlebar-text: #ffffff;
+  --win-titlebar-inactive: #7a96df;
+  --win-border-light: #ffffff;
+  --win-border-shadow: #808080;
+  --win-border-dark: #404040;
+  --win-border-highlight: #dfdfdf;
+  --win-text: #000000;
+  --win-text-muted: #444444;
+  --win-blue: #0a246a;
+  --win-green: #008000;
+  --win-red: #cc0000;
+  --win-scrollbar: #d4d0c8;
+  --win-selected-bg: #0a246a;
+  --win-selected-text: #ffffff;
+}
+
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   body {
-    @apply bg-gray-50;
+    background-color: var(--win-bg);
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    font-size: 11px;
+    color: var(--win-text);
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    font-weight: bold;
+  }
+
+  /* Win2000 scrollbar */
+  ::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--win-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--win-face);
+    border-top: 1px solid var(--win-border-light);
+    border-left: 1px solid var(--win-border-light);
+    border-right: 1px solid var(--win-border-dark);
+    border-bottom: 1px solid var(--win-border-dark);
   }
 }
 
 @layer components {
+
+  /* ===== RAISED BEVEL (button / card outer) ===== */
+  .win-raised {
+    border-top: 2px solid var(--win-border-light);
+    border-left: 2px solid var(--win-border-light);
+    border-right: 2px solid var(--win-border-dark);
+    border-bottom: 2px solid var(--win-border-dark);
+    background-color: var(--win-face);
+  }
+
+  /* ===== SUNKEN BEVEL (input / inset panels) ===== */
+  .win-sunken {
+    border-top: 2px solid var(--win-border-shadow);
+    border-left: 2px solid var(--win-border-shadow);
+    border-right: 2px solid var(--win-border-light);
+    border-bottom: 2px solid var(--win-border-light);
+    background-color: #ffffff;
+  }
+
+  /* ===== WINDOW PANEL ===== */
+  .win-window {
+    background-color: var(--win-face);
+    border-top: 2px solid var(--win-border-light);
+    border-left: 2px solid var(--win-border-light);
+    border-right: 2px solid var(--win-border-dark);
+    border-bottom: 2px solid var(--win-border-dark);
+  }
+
+  /* ===== TITLE BAR ===== */
+  .win-titlebar {
+    background: linear-gradient(to right, #0a246a 0%, #a6caf0 100%);
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 3px 4px 3px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+
+  .win-titlebar-btn {
+    width: 16px;
+    height: 14px;
+    background-color: var(--win-face);
+    border-top: 1px solid var(--win-border-light);
+    border-left: 1px solid var(--win-border-light);
+    border-right: 1px solid var(--win-border-dark);
+    border-bottom: 1px solid var(--win-border-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: bold;
+    color: #000000;
+    cursor: pointer;
+    margin-left: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ===== BUTTON ===== */
   .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+    background-color: var(--win-face);
+    border-top: 2px solid var(--win-border-light);
+    border-left: 2px solid var(--win-border-light);
+    border-right: 2px solid var(--win-border-dark);
+    border-bottom: 2px solid var(--win-border-dark);
+    padding: 3px 12px;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    font-size: 11px;
+    color: var(--win-text);
+    cursor: pointer;
+    min-width: 75px;
+    text-align: center;
+    display: inline-block;
+    user-select: none;
+  }
+
+  .btn:active {
+    border-top: 2px solid var(--win-border-dark);
+    border-left: 2px solid var(--win-border-dark);
+    border-right: 2px solid var(--win-border-light);
+    border-bottom: 2px solid var(--win-border-light);
+    padding-top: 4px;
+    padding-left: 13px;
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+    background-color: var(--win-face);
+    color: var(--win-text);
+    outline: 1px dotted #000000;
+    outline-offset: -4px;
   }
 
   .btn-outline {
-    @apply border border-gray-300 hover:bg-gray-100;
+    background-color: var(--win-face);
+    color: var(--win-text);
   }
 
-  .card {
-    @apply bg-white rounded-lg shadow p-6;
-  }
-
+  /* ===== INPUT FIELDS ===== */
   .input-field {
-    @apply w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    background-color: #ffffff;
+    border-top: 2px solid var(--win-border-shadow);
+    border-left: 2px solid var(--win-border-shadow);
+    border-right: 2px solid var(--win-border-light);
+    border-bottom: 2px solid var(--win-border-light);
+    padding: 2px 4px;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    font-size: 11px;
+    color: var(--win-text);
+    outline: none;
+    width: 100%;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-top-color: var(--win-border-shadow);
+    border-left-color: var(--win-border-shadow);
+  }
+
+  /* ===== CARD (maps to old .card) ===== */
+  .card {
+    background-color: var(--win-face);
+    border-top: 2px solid var(--win-border-light);
+    border-left: 2px solid var(--win-border-light);
+    border-right: 2px solid var(--win-border-dark);
+    border-bottom: 2px solid var(--win-border-dark);
+    padding: 0;
+  }
+
+  /* ===== MENU BAR ===== */
+  .win-menubar {
+    background-color: var(--win-face);
+    border-bottom: 1px solid var(--win-border-shadow);
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    height: 22px;
+  }
+
+  .win-menu-item {
+    padding: 2px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    color: #000000;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 18px;
+  }
+
+  .win-menu-item:hover,
+  .win-menu-item.active {
+    background-color: var(--win-selected-bg);
+    color: var(--win-selected-text);
+  }
+
+  /* ===== TOOLBAR / TASKBAR ===== */
+  .win-toolbar {
+    background-color: var(--win-face);
+    border-bottom: 2px solid var(--win-border-shadow);
+    border-top: 2px solid var(--win-border-light);
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* ===== STATUSBAR ===== */
+  .win-statusbar {
+    background-color: var(--win-face);
+    border-top: 1px solid var(--win-border-shadow);
+    padding: 1px 4px;
+    font-size: 10px;
+    color: var(--win-text);
+    display: flex;
+    align-items: center;
+  }
+
+  /* ===== LISTVIEW TABLE ===== */
+  .win-listview {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    font-size: 11px;
+  }
+
+  .win-listview thead th {
+    background-color: var(--win-face);
+    border-right: 1px solid var(--win-border-shadow);
+    border-bottom: 2px solid var(--win-border-shadow);
+    border-top: 1px solid var(--win-border-light);
+    padding: 2px 6px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 11px;
+    color: var(--win-text);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .win-listview thead th:hover {
+    background-color: #e0ddd6;
+  }
+
+  .win-listview tbody tr {
+    border-bottom: 1px solid #e8e4dd;
+  }
+
+  .win-listview tbody tr:nth-child(even) {
+    background-color: #f0ede8;
+  }
+
+  .win-listview tbody tr:hover {
+    background-color: #c0d4f0;
+    color: #000000;
+  }
+
+  .win-listview tbody td {
+    padding: 2px 6px;
+    font-size: 11px;
+    color: var(--win-text);
+  }
+
+  /* ===== SECTION GROUPBOX ===== */
+  .win-groupbox {
+    border: 1px solid var(--win-border-shadow);
+    border-top: 1px solid var(--win-border-light);
+    padding: 12px 8px 8px 8px;
+    position: relative;
+    margin-top: 8px;
+  }
+
+  .win-groupbox-label {
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background-color: var(--win-face);
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--win-text);
+  }
+
+  /* ===== PROGRESS BAR (category chart) ===== */
+  .win-progress-track {
+    background-color: #ffffff;
+    border-top: 1px solid var(--win-border-shadow);
+    border-left: 1px solid var(--win-border-shadow);
+    border-right: 1px solid var(--win-border-light);
+    border-bottom: 1px solid var(--win-border-light);
+    height: 14px;
+    overflow: hidden;
+  }
+
+  .win-progress-fill {
+    height: 100%;
+    background: repeating-linear-gradient(
+      90deg,
+      #0a246a 0px,
+      #0a246a 10px,
+      #3a56a0 10px,
+      #3a56a0 12px
+    );
+  }
+
+  /* ===== BADGE / TAG ===== */
+  .win-badge {
+    border-top: 1px solid var(--win-border-light);
+    border-left: 1px solid var(--win-border-light);
+    border-right: 1px solid var(--win-border-shadow);
+    border-bottom: 1px solid var(--win-border-shadow);
+    background-color: var(--win-face);
+    padding: 0px 4px;
+    font-size: 10px;
+    color: var(--win-text);
+    display: inline-block;
+  }
+
+  /* ===== LOADING SPINNER ===== */
+  .win-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 32px;
+    font-size: 11px;
+    color: var(--win-text);
+  }
+
+  .win-hourglass {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--win-border-shadow);
+    background-color: var(--win-face);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    animation: spin 1.5s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 }
-

@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 const TransactionTable = ({ transactions, showCategory = true }) => {
   const formatDate = (dateString) => {
@@ -8,56 +7,68 @@ const TransactionTable = ({ transactions, showCategory = true }) => {
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="win-sunken" style={{ overflow: 'auto' }}>
+      <table className="win-listview">
+        <thead>
           <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Description
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            {showCategory && (
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-            )}
-            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount
-            </th>
+            <th style={{ minWidth: '160px' }}>Description</th>
+            <th style={{ minWidth: '100px' }}>Date</th>
+            {showCategory && <th style={{ minWidth: '90px' }}>Category</th>}
+            <th style={{ textAlign: 'right', minWidth: '90px' }}>Amount</th>
+            <th style={{ minWidth: '60px' }}>Type</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {transactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className={`p-2 rounded-full ${transaction.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                    {transaction.type === 'income' ? <FaArrowUp /> : <FaArrowDown />}
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">{transaction.title}</div>
-                  </div>
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(transaction.date)}
-              </td>
-              {showCategory && (
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {transaction.category}
-                  </span>
-                </td>
-              )}
-              <td className={`px-6 py-4 whitespace-nowrap text-right text-sm font-medium ${
-                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+        <tbody>
+          {transactions.length === 0 ? (
+            <tr>
+              <td
+                colSpan={showCategory ? 5 : 4}
+                style={{ padding: '8px 6px', color: '#555', fontStyle: 'italic', textAlign: 'center' }}
+              >
+                No transactions found.
               </td>
             </tr>
-          ))}
+          ) : (
+            transactions.map((transaction) => (
+              <tr key={transaction.id}>
+                <td style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '10px',
+                      height: '10px',
+                      backgroundColor:
+                        transaction.type === 'income' ? 'var(--win-green)' : 'var(--win-red)',
+                      border: '1px solid #000',
+                      flexShrink: 0,
+                    }}
+                  />
+                  {transaction.title}
+                </td>
+                <td>{formatDate(transaction.date)}</td>
+                {showCategory && (
+                  <td>
+                    <span className="win-badge">{transaction.category}</span>
+                  </td>
+                )}
+                <td
+                  style={{
+                    textAlign: 'right',
+                    fontFamily: 'Courier New, monospace',
+                    color:
+                      transaction.type === 'income' ? 'var(--win-green)' : 'var(--win-red)',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {transaction.type === 'income' ? '+' : '-'}$
+                  {Math.abs(transaction.amount).toFixed(2)}
+                </td>
+                <td style={{ fontSize: '10px', color: '#555' }}>
+                  {transaction.type === 'income' ? 'Income' : 'Expense'}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

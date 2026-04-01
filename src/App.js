@@ -67,9 +67,9 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--win-bg)', fontFamily: 'Tahoma, Arial, sans-serif' }}>
         <Navbar />
-        <main className="container mx-auto px-4 py-8">
+        <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '8px' }}>
           <Routes>
             <Route path="/" element={<Dashboard transactions={transactions} />} />
             <Route 

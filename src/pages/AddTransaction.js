@@ -6,16 +6,16 @@ const AddTransaction = ({ onAddTransaction }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (transaction) => {
     setIsSubmitting(true);
     setError(null);
-    
+    setSuccess(false);
     try {
-      // Call the parent's onAddTransaction function to add the new transaction
       await onAddTransaction(transaction);
-      // Navigate back to the dashboard after successful submission
-      navigate('/');
+      setSuccess(true);
+      setTimeout(() => navigate('/'), 800);
     } catch (err) {
       console.error('Error adding transaction:', err);
       setError('Failed to add transaction. Please try again.');
@@ -25,37 +25,85 @@ const AddTransaction = ({ onAddTransaction }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Add New Transaction</h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="text-gray-600 hover:text-gray-800"
-        >
-          ← Back
-        </button>
-      </div>
-      
-      <div className="card">
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            </div>
+    <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+      {/* Window */}
+      <div className="win-window">
+        {/* Title bar */}
+        <div className="win-titlebar">
+          <span>Add New Transaction</span>
+          <div style={{ display: 'flex', gap: '2px' }}>
+            <span className="win-titlebar-btn">_</span>
+            <span className="win-titlebar-btn">&#9633;</span>
+            <span
+              className="win-titlebar-btn"
+              style={{ marginLeft: '4px', fontWeight: 'bold' }}
+              onClick={() => navigate(-1)}
+              title="Close"
+            >
+              X
+            </span>
           </div>
-        )}
-        
-        <TransactionForm 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting}
-        />
+        </div>
+
+        {/* Toolbar */}
+        <div className="win-toolbar">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => navigate(-1)}
+            style={{ minWidth: '60px', fontSize: '11px' }}
+          >
+            &#8592; Back
+          </button>
+        </div>
+
+        {/* Form area */}
+        <div style={{ padding: '10px 12px', backgroundColor: 'var(--win-face)' }}>
+          {/* Error dialog */}
+          {error && (
+            <div
+              className="win-raised"
+              style={{
+                marginBottom: '8px',
+                padding: '6px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#fff0f0',
+              }}
+            >
+              <span style={{ fontSize: '18px', lineHeight: 1 }}>&#9888;</span>
+              <span style={{ fontSize: '11px', color: 'var(--win-red)' }}>{error}</span>
+            </div>
+          )}
+
+          {/* Success message */}
+          {success && (
+            <div
+              className="win-raised"
+              style={{
+                marginBottom: '8px',
+                padding: '6px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#f0fff0',
+              }}
+            >
+              <span style={{ fontSize: '18px', lineHeight: 1 }}>&#10003;</span>
+              <span style={{ fontSize: '11px', color: 'var(--win-green)' }}>
+                Transaction added! Redirecting...
+              </span>
+            </div>
+          )}
+
+          <TransactionForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        </div>
+
+        {/* Status bar */}
+        <div className="win-statusbar">
+          <span>{isSubmitting ? 'Saving transaction...' : 'Ready'}</span>
+        </div>
       </div>
     </div>
   );
