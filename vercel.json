@@ -1,40 +1,14 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "build",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/static/(.*)",
-      "headers": { "cache-control": "s-maxage=31536000,immutable,public" },
-      "continue": true
+      "source": "/((.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)|manifest\\.json|favicon\\.ico))",
+      "destination": "/$1"
     },
     {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "headers": { "cache-control": "s-maxage=31536000,immutable,public" },
-      "continue": true
-    },
-    {
-      "src": "/manifest.json",
-      "headers": { "cache-control": "s-maxage=0,public" },
-      "continue": true
-    },
-    {
-      "src": "/favicon.ico",
-      "headers": { "cache-control": "s-maxage=0,public" },
-      "continue": true
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
