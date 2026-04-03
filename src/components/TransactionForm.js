@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const TransactionForm = ({ onSubmit, initialData = {} }) => {
   const [formData, setFormData] = useState({
-    title: initialData.title || '',
+    description: initialData.description || '',
     amount: initialData.amount || '',
     category: initialData.category || 'Food',
     type: initialData.type || 'expense',
@@ -11,7 +11,7 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
 
   const categories = [
     'Food', 'Shopping', 'Transport', 'Housing', 'Entertainment', 
-    'Utilities', 'Healthcare', 'Education', 'Salary', 'Other'
+    'Utilities', 'Healthcare', 'Education', 'Salary', 'Freelance', 'Investments', 'Gifts', 'Other'
   ];
 
   const handleChange = (e) => {
@@ -46,16 +46,17 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          Description
         </label>
         <input
           type="text"
-          id="title"
-          name="title"
-          value={formData.title}
+          id="description"
+          name="description"
+          value={formData.description}
           onChange={handleChange}
-          className="input-field mt-1"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 mt-1"
+          placeholder="Enter transaction description"
           required
         />
       </div>
@@ -66,7 +67,7 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
         </label>
         <div className="mt-1 relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-gray-500 sm:text-sm">$</span>
+            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">₹</span>
           </div>
           <input
             type="number"
@@ -75,7 +76,7 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
             name="amount"
             value={formData.amount}
             onChange={handleChange}
-            className="input-field pl-7"
+            className="w-full pl-7 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
             placeholder="0.00"
             required
           />
@@ -92,7 +93,7 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="input-field mt-1"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 mt-1"
           >
             {categories.map(category => (
               <option key={category} value={category}>
@@ -112,7 +113,7 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
               name="type"
               value={formData.type}
               onChange={handleChange}
-              className="input-field"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
             >
               <option value="expense">Expense</option>
               <option value="income">Income</option>
@@ -131,7 +132,7 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
           name="date"
           value={formData.date}
           onChange={handleChange}
-          className="input-field mt-1"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 mt-1"
           required
         />
       </div>
@@ -139,10 +140,10 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
       <div className="flex justify-end space-x-3">
         <button
           type="button"
-          className="btn btn-outline"
+          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           onClick={() => {
             setFormData({
-              title: '',
+              description: '',
               amount: '',
               category: 'Food',
               type: 'expense',
@@ -152,7 +153,10 @@ const TransactionForm = ({ onSubmit, initialData = {} }) => {
         >
           Reset
         </button>
-        <button type="submit" className="btn btn-primary">
+        <button 
+          type="submit" 
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
           {initialData.id ? 'Update' : 'Add'} Transaction
         </button>
       </div>

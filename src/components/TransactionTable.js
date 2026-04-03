@@ -1,7 +1,13 @@
 import React from 'react';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaArrowUp, FaArrowDown, FaEdit, FaTrash } from 'react-icons/fa';
 
-const TransactionTable = ({ transactions, showCategory = true }) => {
+const TransactionTable = ({ 
+  transactions, 
+  showCategory = true,
+  onEdit,
+  onDelete,
+  isAdmin = false 
+}) => {
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -26,6 +32,11 @@ const TransactionTable = ({ transactions, showCategory = true }) => {
             <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Amount
             </th>
+            {isAdmin && (
+              <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -37,7 +48,7 @@ const TransactionTable = ({ transactions, showCategory = true }) => {
                     {transaction.type === 'income' ? <FaArrowUp /> : <FaArrowDown />}
                   </div>
                   <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">{transaction.title}</div>
+                    <div className="text-sm font-medium text-gray-900">{transaction.description}</div>
                   </div>
                 </div>
               </td>
@@ -54,8 +65,24 @@ const TransactionTable = ({ transactions, showCategory = true }) => {
               <td className={`px-6 py-4 whitespace-nowrap text-right text-sm font-medium ${
                 transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
               }`}>
-                {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+                {transaction.type === 'income' ? '+' : '-'}₹{Math.abs(transaction.amount).toLocaleString('en-IN')}
               </td>
+              {isAdmin && (
+                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                  <button
+                    onClick={() => onEdit(transaction)}
+                    className="text-blue-600 hover:text-blue-800 mr-3"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => onDelete(transaction.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

@@ -1,118 +1,231 @@
-import React, { useState, useEffect } from 'react';
-import { FaArrowUp, FaArrowDown, FaWallet } from 'react-icons/fa';
+import React from 'react';
+import { useFinance } from '../context/FinanceContext';
 import SummaryCard from '../components/SummaryCard';
-import TransactionTable from '../components/TransactionTable';
 import TopCategoriesChart from '../components/TopCategoriesChart';
+import TransactionTable from '../components/TransactionTable';
+import { FaWallet, FaArrowUp, FaArrowDown, FaChartLine, FaHistory } from 'react-icons/fa';
 
-const Dashboard = ({ transactions = [] }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [summary, setSummary] = useState({
-    totalIncome: 0,
-    totalExpenses: 0,
-    balance: 0,
-  });
-  const [topCategories, setTopCategories] = useState([]);
+const Dashboard = () => {
+  const { calculateSummary, transactions } = useFinance();
+  const summary = calculateSummary();
   
-  // Get recent transactions (last 5)
-  const recentTransactions = [...transactions]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
 
-  // Calculate summary and categories when transactions change
-  useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      const income = transactions
-        .filter(tx => tx.type === 'income')
-        .reduce((sum, tx) => sum + tx.amount, 0);
 
-      const expenses = transactions
-        .filter(tx => tx.type === 'expense')
-        .reduce((sum, tx) => sum + tx.amount, 0);
+  // Calculate monthly data for trend chart
+  const getMonthlyData = () => {
+    const monthlyData = {};
+    
+    transactions.forEach(txn => {
+      const month = txn.date.substring(0, 7); // YYYY-MM
+      if (!monthlyData[month]) {
+        monthlyData[month] = { income: 0, expense: 0 };
+      }
+      if (txn.type === 'income') {
+        monthlyData[month].income += txn.amount;
+      } else {
+        monthlyData[month].expense += txn.amount;
+      }
+    });
+    
+    return Object.entries(monthlyData)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-6)
+      .map(([month, data]) => ({
+        month,
+        income: data.income,
+        expense: data.expense
+      }));
+  };
 
-      setSummary({
-        totalIncome: income,
-        totalExpenses: expenses,
-        balance: income - expenses,
+  // Get top spending categories
+  const getTopCategories = () => {
+    const categorySpending = {};
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(txn => {
+        categorySpending[txn.category] = (categorySpending[txn.category] || 0) + txn.amount;
       });
+    
+    return Object.entries(categorySpending)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([category, amount]) => ({ category, amount }));
+  };
 
-      // Calculate top categories
-      const categoryMap = {};
-      
-      transactions
-        .filter(tx => tx.type === 'expense')
-        .forEach(tx => {
-          if (!categoryMap[tx.category]) {
-            categoryMap[tx.category] = 0;
-          }
-          categoryMap[tx.category] += tx.amount;
-        });
+  // Calculate insights
+  const getInsights = () => {
+    const expenses = transactions.filter(t => t.type === 'expense');
+    
+    const categorySpending = {};
+    expenses.forEach(txn => {
+      categorySpending[txn.category] = (categorySpending[txn.category] || 0) + txn.amount;
+    });
+    
+    const topCategory = Object.entries(categorySpending)
+      .sort((a, b) => b[1] - a[1])[0];
+    
+    const avgExpense = expenses.length > 0 
+      ? expenses.reduce((sum, t) => sum + t.amount, 0) / expenses.length 
+      : 0;
+    
+    const savingsRate = summary.income > 0 
+      ? ((summary.income - summary.expense) / summary.income * 100).toFixed(1)
+      : 0;
+    
+    return [
+      {
+        title: 'Highest Spending',
+        value: topCategory ? `${topCategory[0]} (₹${topCategory[1].toLocaleString('en-IN')})` : 'N/A',
+        icon: '📊'
+      },
+      {
+        title: 'Avg Expense',
+        value: `₹${Math.round(avgExpense).toLocaleString('en-IN')}`,
+        icon: '💰'
+      },
+      {
+        title: 'Savings Rate',
+        value: `${savingsRate}%`,
+        icon: '🎯'
+      }
+    ];
+  };
 
-      const categories = Object.entries(categoryMap)
-        .map(([category, amount]) => ({
-          category,
-          amount: parseFloat(amount.toFixed(2)),
-        }))
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5);
-
-      setTopCategories(categories);
-      setIsLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [transactions]);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  const insights = getInsights();
+  const monthlyData = getMonthlyData();
+  const topCategories = getTopCategories();
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-800">Dashboard Overview</h1>
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <FaChartLine />
+          <span>Last 6 months</span>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SummaryCard 
-          title="Total Income" 
-          amount={summary.totalIncome.toFixed(2)} 
-          change={5.2} 
-          icon={FaArrowUp} 
-          trend="up" 
+        <SummaryCard
+          title="Total Balance"
+          amount={summary.balance}
+          icon={FaWallet}
+          color="blue"
+          trend="stable"
         />
-        <SummaryCard 
-          title="Total Expenses" 
-          amount={summary.totalExpenses.toFixed(2)} 
-          change={2.7} 
-          icon={FaArrowDown} 
-          trend="down" 
+        <SummaryCard
+          title="Total Income"
+          amount={summary.income}
+          icon={FaArrowUp}
+          color="green"
+          trend="positive"
         />
-        <SummaryCard 
-          title="Current Balance" 
-          amount={summary.balance.toFixed(2)} 
-          change={3.8} 
-          icon={FaWallet} 
-          trend={summary.balance >= 0 ? 'up' : 'down'} 
+        <SummaryCard
+          title="Total Expenses"
+          amount={summary.expense}
+          icon={FaArrowDown}
+          color="red"
+          trend="negative"
         />
       </div>
 
-      {/* Charts and Recent Transactions */}
+      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <div className="card">
-            <h2 className="text-lg font-medium mb-4">Recent Transactions</h2>
-            <div className="overflow-x-auto">
-              <TransactionTable transactions={recentTransactions} showCategory={true} />
+        {/* Monthly Trend Chart */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Monthly Trend
+          </h2>
+          <div className="h-64">
+            {monthlyData.length > 0 ? (
+              <div className="flex items-end justify-between h-full space-x-2">
+                {monthlyData.map((data) => (
+                  <div key={data.month} className="flex-1 flex flex-col items-center">
+                    <div className="w-full flex space-x-1 items-end h-48">
+                      <div
+                        className="bg-green-500 rounded-t transition-all duration-300 hover:bg-green-600"
+                        style={{
+                          height: `${(data.income / Math.max(...monthlyData.map(d => d.income))) * 100}%`,
+                          width: '45%'
+                        }}
+                        title={`Income: $${data.income.toLocaleString()}`}
+                      ></div>
+                      <div
+                        className="bg-red-500 rounded-t transition-all duration-300 hover:bg-red-600"
+                        style={{
+                          height: `${(data.expense / Math.max(...monthlyData.map(d => d.expense))) * 100}%`,
+                          width: '45%'
+                        }}
+                        title={`Expense: $${data.expense.toLocaleString()}`}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-gray-600 mt-2">
+                      {data.month.substring(5)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                No data available
+              </div>
+            )}
+          </div>
+          <div className="flex justify-center mt-4 space-x-6">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-green-500 rounded"></div>
+              <span className="text-sm text-gray-600">Income</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-red-500 rounded"></div>
+              <span className="text-sm text-gray-600">Expense</span>
             </div>
           </div>
         </div>
-        
-        <div className="space-y-6">
-          <TopCategoriesChart data={topCategories} />
+
+        {/* Top Categories */}
+        <TopCategoriesChart categories={topCategories} />
+      </div>
+
+      {/* Recent Transactions Section */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+            <FaHistory className="mr-2" />
+            Recent Transactions
+          </h2>
+          <span className="text-sm text-gray-600">Last 5 transactions</span>
+        </div>
+        <TransactionTable 
+          transactions={transactions.slice(0, 5)} 
+          showCategory={true}
+          isAdmin={false}
+        />
+      </div>
+
+      {/* Insights Section */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Financial Insights
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {insights.map((insight, index) => (
+            <div
+              key={index}
+              className="bg-gray-50 rounded-lg p-4 flex items-start space-x-3"
+            >
+              <span className="text-2xl">{insight.icon}</span>
+              <div>
+                <p className="text-sm text-gray-600">{insight.title}</p>
+                <p className="text-lg font-semibold text-gray-800">
+                  {insight.value}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -1,20 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFinance } from '../context/FinanceContext';
 import TransactionForm from '../components/TransactionForm';
 
-const AddTransaction = ({ onAddTransaction }) => {
+const AddTransaction = () => {
   const navigate = useNavigate();
+  const { addTransaction, role } = useFinance();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  // Check if user has admin role
+  if (role !== 'admin') {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-red-50 border-l-4 border-red-400 p-4">
+          <p className="text-red-700">
+            You don't have permission to add transactions. Please switch to Admin role.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (transaction) => {
     setIsSubmitting(true);
     setError(null);
     
     try {
-      // Call the parent's onAddTransaction function to add the new transaction
-      await onAddTransaction(transaction);
-      // Navigate back to the dashboard after successful submission
+      await addTransaction(transaction);
       navigate('/');
     } catch (err) {
       console.error('Error adding transaction:', err);
@@ -36,7 +49,7 @@ const AddTransaction = ({ onAddTransaction }) => {
         </button>
       </div>
       
-      <div className="card">
+      <div className="bg-white rounded-xl shadow-lg p-6">
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
             <div className="flex">

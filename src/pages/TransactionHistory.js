@@ -1,73 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { FaSearch, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaSearch, FaDownload } from 'react-icons/fa';
+import { useFinance } from '../context/FinanceContext';
+import TransactionTable from '../components/TransactionTable';
 
-const TransactionHistory = ({ transactions = [] }) => {
-  const [filteredTransactions, setFilteredTransactions] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+const TransactionHistory = () => {
+  const { 
+    filteredTransactions, 
+    filters, 
+    setFilters, 
+    role,
+    deleteTransaction 
+  } = useFinance();
+  
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
-  const [filters, setFilters] = useState({
-    type: 'all',
-    category: 'all',
-    startDate: '',
-    endDate: '',
-  });
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Initialize filtered transactions when transactions prop changes
-  useEffect(() => {
-    if (transactions && transactions.length > 0) {
-      setFilteredTransactions(transactions);
-      setIsLoading(false);
-    }
-  }, [transactions]);
-
-  // Apply filters and sorting
-  useEffect(() => {
-    let result = [...transactions];
-
-    // Apply search
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(tx => 
-        tx.title.toLowerCase().includes(term) ||
-        tx.category.toLowerCase().includes(term) ||
-        tx.amount.toString().includes(term)
-      );
-    }
-
-    // Apply type filter
-    if (filters.type !== 'all') {
-      result = result.filter(tx => tx.type === filters.type);
-    }
-
-    // Apply category filter
-    if (filters.category !== 'all') {
-      result = result.filter(tx => tx.category === filters.category);
-    }
-
-    // Apply date range filter
-    if (filters.startDate) {
-      result = result.filter(tx => tx.date >= filters.startDate);
-    }
-    if (filters.endDate) {
-      result = result.filter(tx => tx.date <= filters.endDate);
-    }
-
-    // Apply sorting
-    if (sortConfig.key) {
-      result.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-
-    setFilteredTransactions(result);
-  }, [transactions, searchTerm, filters, sortConfig]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -85,56 +30,65 @@ const TransactionHistory = ({ transactions = [] }) => {
     }));
   };
 
-  // Format date to be more readable with null/undefined handling
-  const formatDate = (dateString) => {
-    try {
-      if (!dateString) return 'N/A';
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Error';
+  const handleExport = () => {
+    const dataStr = JSON.stringify(filteredTransactions, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `transactions_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this transaction?')) {
+      deleteTransaction(id);
     }
   };
 
-  // Get unique categories for filter dropdown
-  const categories = [...new Set(transactions.map(tx => tx.category))].filter(Boolean);
+  const handleEdit = (transaction) => {
+    alert('Edit functionality - You can implement a modal here to edit transaction details');
+    console.log('Edit transaction:', transaction);
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  const categories = [...new Set(filteredTransactions.map(tx => tx.category))].filter(Boolean);
+  const isAdmin = role === 'admin';
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Transaction History</h1>
-        <div className="relative w-full md:w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaSearch className="text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="input-field pl-10 w-full"
-            placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <h1 className="text-3xl font-bold text-gray-800">Transaction History</h1>
+        <div className="flex space-x-3 mt-4 md:mt-0">
+          <button
+            onClick={() => handleExport('json')}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          >
+            <FaDownload />
+            <span>Export JSON</span>
+          </button>
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative w-full md:w-96">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <FaSearch className="text-gray-400" />
+        </div>
+        <input
+          type="text"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
+          placeholder="Search transactions..."
+          value={filters.search}
+          onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+        />
+      </div>
+
       {/* Filters */}
-      <div className="card p-4 mb-6">
-        <h2 className="text-lg font-medium mb-4">Filters</h2>
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Filters</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
@@ -142,7 +96,7 @@ const TransactionHistory = ({ transactions = [] }) => {
               name="type"
               value={filters.type}
               onChange={handleFilterChange}
-              className="input-field w-full"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Types</option>
               <option value="income">Income</option>
@@ -156,7 +110,7 @@ const TransactionHistory = ({ transactions = [] }) => {
               name="category"
               value={filters.category}
               onChange={handleFilterChange}
-              className="input-field w-full"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
@@ -174,7 +128,7 @@ const TransactionHistory = ({ transactions = [] }) => {
               name="startDate"
               value={filters.startDate}
               onChange={handleFilterChange}
-              className="input-field w-full"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -185,7 +139,7 @@ const TransactionHistory = ({ transactions = [] }) => {
               name="endDate"
               value={filters.endDate}
               onChange={handleFilterChange}
-              className="input-field w-full"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
               min={filters.startDate}
             />
           </div>
@@ -193,105 +147,20 @@ const TransactionHistory = ({ transactions = [] }) => {
       </div>
 
       {/* Transaction Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('title')}
-                >
-                  <div className="flex items-center">
-                    Description
-                    {sortConfig.key === 'title' && (
-                      <span className="ml-1">
-                        {sortConfig.direction === 'asc' ? <FaSortAmountUp /> : <FaSortAmountDown />}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('date')}
-                >
-                  <div className="flex items-center">
-                    Date
-                    {sortConfig.key === 'date' && (
-                      <span className="ml-1">
-                        {sortConfig.direction === 'asc' ? <FaSortAmountUp /> : <FaSortAmountDown />}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('category')}
-                >
-                  <div className="flex items-center">
-                    Category
-                    {sortConfig.key === 'category' && (
-                      <span className="ml-1">
-                        {sortConfig.direction === 'asc' ? <FaSortAmountUp /> : <FaSortAmountDown />}
-                      </span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('amount')}
-                >
-                  <div className="flex items-center justify-end">
-                    Amount
-                    {sortConfig.key === 'amount' && (
-                      <span className="ml-1">
-                        {sortConfig.direction === 'asc' ? <FaSortAmountUp /> : <FaSortAmountDown />}
-                      </span>
-                    )}
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {transaction.title}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(transaction.date)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {transaction.category}
-                      </span>
-                    </td>
-                    <td 
-                      className={`px-6 py-4 whitespace-nowrap text-right text-sm font-medium ${
-                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
-                    No transactions found matching your criteria.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        {filteredTransactions.length > 0 ? (
+          <TransactionTable 
+            transactions={filteredTransactions} 
+            showCategory={true}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            isAdmin={isAdmin}
+          />
+        ) : (
+          <div className="p-12 text-center text-gray-500">
+            <p className="text-lg">No transactions found matching your criteria.</p>
+          </div>
+        )}
       </div>
     </div>
   );

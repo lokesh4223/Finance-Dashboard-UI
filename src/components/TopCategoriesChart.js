@@ -5,7 +5,7 @@ import { Doughnut } from 'react-chartjs-2';
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const TopCategoriesChart = ({ data }) => {
+const TopCategoriesChart = ({ categories }) => {
   const chartRef = useRef(null);
   
   // Generate random colors for categories
@@ -23,15 +23,15 @@ const TopCategoriesChart = ({ data }) => {
 
   // Prepare chart data with useMemo for better performance
   const chartData = useMemo(() => ({
-    labels: data.map(item => item.category),
+    labels: categories.map(item => item.category),
     datasets: [
       {
-        data: data.map(item => item.amount),
-        backgroundColor: generateColors(data.length),
+        data: categories.map(item => item.amount),
+        backgroundColor: generateColors(categories.length),
         borderWidth: 1,
       },
     ],
-  }), [data]);
+  }), [categories]);
 
   const options = {
     responsive: true,
@@ -56,11 +56,19 @@ const TopCategoriesChart = ({ data }) => {
   };
 
   return (
-    <div className="card h-80">
-      <h3 className="text-lg font-medium mb-4">Spending by Category</h3>
-      <div className="h-64">
-        <Doughnut ref={chartRef} data={chartData} options={options} />
-      </div>
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        Top Spending Categories
+      </h2>
+      {categories.length > 0 ? (
+        <div className="h-64">
+          <Doughnut ref={chartRef} data={chartData} options={options} />
+        </div>
+      ) : (
+        <div className="flex items-center justify-center h-64 text-gray-400">
+          No expense data available
+        </div>
+      )}
     </div>
   );
 };
