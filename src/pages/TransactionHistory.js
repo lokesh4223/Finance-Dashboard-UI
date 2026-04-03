@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FaSearch, FaDownload } from 'react-icons/fa';
 import { useFinance } from '../context/FinanceContext';
 import TransactionTable from '../components/TransactionTable';
@@ -11,16 +11,6 @@ const TransactionHistory = () => {
     role,
     deleteTransaction 
   } = useFinance();
-  
-  const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
-
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
